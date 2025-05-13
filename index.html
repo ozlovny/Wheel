@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>рулетка подарков</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #222;
+            color: white;
+        }
+  
+
+        .roulette-container {
+            width: 300px;
+            height: 100px;
+            overflow: hidden;
+            position: relative;
+            margin: 50px auto;
+            background: #333;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .skins-list {
+            display: flex;
+            position: absolute;
+            left: 0;
+            width: max-content;
+        }
+
+        .skin-item {
+            min-width: 100px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #444;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        .skin-item img {
+            max-width: 100%;
+            max-height: 80px;
+        }
+
+        /* Центральная линия */
+        .center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 4px;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        #spinBtn {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            background: #ff5722;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        #spinBtn:hover {
+            background: #e64a19;
+        }
+
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        /* Нижнее меню */
+        .bottom-menu {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #333;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 2px solid #fff;
+        }
+        
+        .menu-button {
+            flex: 1;
+            padding: 15px;
+            font-size: 16px;
+            color: white;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .menu-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Нижнее меню -->
+    <div class="bottom-menu">
+        <button class="menu-button" onclick="loadContent('top')">Топ</button>
+        <button class="menu-button" onclick="loadContent('game')">Играть</button>
+        <button class="menu-button" onclick="loadContent('profile')">Профиль</button>
+    </div>
+
+    <!-- Блок рулетки (скрывается при переключении) -->
+    <div id="rouletteSection">
+        <h1>Рулетка подарков</h1>
+        <div class="roulette-container">
+            <div class="center-line"></div>
+            <div class="skins-list" id="skinsList"></div>
+        </div>
+        <button id="spinBtn">Открыть кейс</button>
+        <p id="result"></p>
+    </div>
+
+    <div id="pageContent">
+        <h2>Добро пожаловать!</h2>
+        <p>Выберите раздел.</p>
+    </div>
+
+    <script>
+        const gifs = [
+            "gif1.gif", "gif2.gif", "gif3.gif", "gif4.gif", "gif5.gif",
+            "gif6.gif", "gif7.gif", "gif8.gif", "gif9.gif", "gif10.gif"
+        ]; 
+
+        const skinsList = document.getElementById("skinsList");
+
+        function generateRollingSkins() {
+            skinsList.innerHTML = ""; 
+            let rollingSkins = [];
+
+            for (let i = 0; i < 40; i++) {
+                rollingSkins.push(gifs[Math.floor(Math.random() * gifs.length)]);
+            }
+
+            rollingSkins.forEach(gif => {
+                let div = document.createElement("div");
+                div.className = "skin-item";
+                let img = document.createElement("img");
+                img.src = gif;
+                div.appendChild(img);
+                skinsList.appendChild(div);
+            });
+
+            skinsList.style.transform = "translateX(0px)"; 
+            skinsList.style.transition = "none"; 
+        }
+
+        function startRoulette() {
+            generateRollingSkins();
+
+            setTimeout(() => {
+                let centerPosition = Math.floor(skinsList.children.length / 2); 
+                let itemWidth = 110; 
+                let containerWidth = document.querySelector(".roulette-container").offsetWidth;
+                let finalPosition = -(centerPosition * itemWidth - containerWidth / 2 + itemWidth / 2); 
+
+                skinsList.style.transition = "transform 4s cubic-bezier(0.25, 1, 0.5, 1)";
+                skinsList.style.transform = `translateX(${finalPosition}px)`;
+
+                setTimeout(() => {
+                    let selectedSkin = skinsList.children[centerPosition].querySelector("img").src;
+                    document.getElementById("result").innerHTML = 
+                        "Поздравляем! Ваш выигрыш:<br>" + 
+                        `<img src="${selectedSkin}" style="width: 50px; height: 50px;" />`;
+                }, 4100);
+            }, 100);
+        }
+
+        document.getElementById("spinBtn").addEventListener("click", startRoulette);
+
+        function loadContent(page) {
+            let content = {
+                "top": "<h2>Топ игроков</h2><p>Здесь будет рейтинг.</p>",
+                "game": "<h2></h2><p></p>",
+                "profile": "<h2>Профиль</h2><p>Информация о пользователе.</p>"
+            };
+
+            document.getElementById("pageContent").innerHTML = content[page] || "<h2>Ошибка!</h2>";
+
+            // Скрываем рулетку при переходе на "Топ" и "Профиль"
+            if (page === "top" || page === "profile") {
+                document.getElementById("rouletteSection").style.display = "none";
+            } else {
+                document.getElementById("rouletteSection").style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
