@@ -134,83 +134,80 @@
     </div>
 
     <script>
+    async function requestStarPayment() {
+        let userId = window.Telegram.WebApp.initDataUnsafe?.user?.id || null;
+
+        if (!userId) {
+            document.getElementById("starResult").innerHTML = "❌ Ошибка: Telegram ID не найден!";
+            return;
+        }
+
+        // Запрашиваем списание 1 Telegram Star
+        await fetch(`https://api.telegram.org/bot7841153969:AAGEic8J_KnmFbx_VbrH9FcLVJ1ocZiCPc0/sendInvoice`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: userId,
+                title: "Крутка рулетки",
+                description: "Заплати 1 Telegram Star, чтобы запустить рулетку!",
+                payload: "spin_roulette",
+                currency: "XTR",
+                prices: [{ label: "Telegram Star", amount: 1 }] // 1 Star
+            })
+        });
+    }
+
+    // Запускаем рулетку сразу после успешного платежа
+    window.Telegram.WebApp.onEvent("successful_payment", () => {
+        startRoulette();
+        document.getElementById("starResult").innerHTML = "✅ Оплата принята! Запускаем рулетку...";
+    });
+
+    document.getElementById("starSpinBtn").addEventListener("click", requestStarPayment);
+
+    function startRoulette() {
         const gifs = [
             "gif1.gif", "gif2.gif", "gif3.gif", "gif4.gif", "gif5.gif",
             "gif6.gif", "gif7.gif", "gif8.gif", "gif9.gif", "gif10.gif"
-        ]; 
+        ];
 
         const skinsList = document.getElementById("skinsList");
+        skinsList.innerHTML = "";
 
-        function generateRollingSkins() {
-            skinsList.innerHTML = ""; 
-            let rollingSkins = [];
-
-            for (let i = 0; i < 40; i++) {
-                rollingSkins.push(gifs[Math.floor(Math.random() * gifs.length)]);
-            }
-
-            rollingSkins.forEach(gif => {
-                let div = document.createElement("div");
-                div.className = "skin-item";
-                let img = document.createElement("img");
-                img.src = gif;
-                div.appendChild(img);
-                skinsList.appendChild(div);
-            });
-
-            skinsList.style.transform = "translateX(0px)"; 
-            skinsList.style.transition = "none"; 
+        let rollingSkins = [];
+        for (let i = 0; i < 40; i++) {
+            rollingSkins.push(gifs[Math.floor(Math.random() * gifs.length)]);
         }
 
-        function startRoulette() {
-            generateRollingSkins();
-
-            setTimeout(() => {
-                let centerPosition = Math.floor(skinsList.children.length / 2); 
-                let itemWidth = 110; 
-                let containerWidth = document.querySelector(".roulette-container").offsetWidth;
-                let finalPosition = -(centerPosition * itemWidth - containerWidth / 2 + itemWidth / 2); 
-
-                skinsList.style.transition = "transform 4s cubic-bezier(0.25, 1, 0.5, 1)";
-                skinsList.style.transform = `translateX(${finalPosition}px)`;
-
-                setTimeout(() => {
-                    let selectedSkin = skinsList.children[centerPosition].querySelector("img").src;
-                    document.getElementById("starResult").innerHTML = 
-                        "Поздравляем! Ваш выигрыш:<br>" + 
-                        `<img src="${selectedSkin}" style="width: 50px; height: 50px;" />`;
-                }, 4100);
-            }, 100);
-        }
-
-        async function requestStarPayment() {
-            let userId = window.Telegram.WebApp.initDataUnsafe?.user?.id || null;
-
-            if (!userId) {
-                document.getElementById("starResult").innerHTML = "Ошибка: Telegram ID не найден!";
-                return;
-            }
-
-            await fetch(`https://api.telegram.org/bot7841153969:AAGEic8J_KnmFbx_VbrH9FcLVJ1ocZiCPc0/sendInvoice`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    chat_id: userId,
-                    title: "Крутка рулетки",
-                    description: "Заплати 1 Telegram Star, чтобы запустить рулетку!",
-                    payload: "spin_roulette",
-                    currency: "XTR",
-                    prices: [{ label: "Telegram Star", amount: 1 }]
-                })
-            });
-        }
-
-        window.Telegram.WebApp.onEvent("successful_payment", () => {
-            startRoulette();
-            document.getElementById("starResult").innerHTML = "✅ Оплата принята! Запускаем рулетку...";
+        rollingSkins.forEach(gif => {
+            let div = document.createElement("div");
+            div.className = "skin-item";
+            let img = document.createElement("img");
+            img.src = gif;
+            div.appendChild(img);
+            skinsList.appendChild(div);
         });
 
-        document.getElementById("starSpinBtn").addEventListener("click", requestStarPayment);
+        skinsList.style.transform = "translateX(0px)";
+        skinsList.style.transition = "none";
+
+        setTimeout(() => {
+            let centerPosition = Math.floor(skinsList.children.length / 2);
+            let itemWidth = 110;
+            let containerWidth = document.querySelector(".roulette-container").offsetWidth;
+            let finalPosition = -(centerPosition * itemWidth - containerWidth / 2 + itemWidth / 2);
+
+            skinsList.style.transition = "transform 4s cubic-bezier(0.25, 1, 0.5, 1)";
+            skinsList.style.transform = `translateX(${finalPosition}px)`;
+
+            setTimeout(() => {
+                let selectedSkin = skinsList.children[centerPosition].querySelector("img").src;
+                document.getElementById("starResult").innerHTML =
+                    "🎉 Поздравляем! Ваш выигрыш:<br>" +
+                    `<img src="${selectedSkin}" style="width: 50px; height: 50px;" />`;
+            }, 4100);
+        }, 100);
+    }
     </script>
 </body>
 </html>
