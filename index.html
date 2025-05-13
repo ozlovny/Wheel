@@ -176,7 +176,7 @@
 
                 setTimeout(() => {
                     let selectedSkin = skinsList.children[centerPosition].querySelector("img").src;
-                    document.getElementById("result").innerHTML = 
+                    document.getElementById("starResult").innerHTML = 
                         "Поздравляем! Ваш выигрыш:<br>" + 
                         `<img src="${selectedSkin}" style="width: 50px; height: 50px;" />`;
                 }, 4100);
@@ -204,6 +204,11 @@
                 })
             });
         }
+
+        window.Telegram.WebApp.onEvent("successful_payment", () => {
+            startRoulette();
+            document.getElementById("starResult").innerHTML = "✅ Оплата принята! Запускаем рулетку...";
+        });
 
         document.getElementById("starSpinBtn").addEventListener("click", requestStarPayment);
     </script>
